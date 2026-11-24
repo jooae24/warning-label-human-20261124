@@ -1,21 +1,42 @@
-// The line is built to the judge's published brief: it is a single-line safety warning label for every human being, funny first and plausible second, the laugh lands in one read with the turn arriving in the last few words ('heavy discourse'), it feels true about how humans actually behave, it sounds like a real printed label, and it stays inside 160 characters with no filler and no second idea.
+// warning-label-human-20261124 — my entry for make.fun's "Warning Label
+// for Humans: One Line, Big Laugh" bounty ($5 USDC, 160 characters max).
 //
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// The idea: if humans shipped with the safety stickers that appliances get,
+// the first warning would be about the opinions. Formed in under three
+// seconds, delivered with total confidence, and absolutely not to be used
+// near heavy discourse. It reads like a real printed label because the
+// format is doing half the joke.
+//
+// Try it locally (the grader points MAKEFUN_OUTPUT_DIR at /output):
+//   MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
-const text =
-  "WARNING: Contains opinions formed in under three seconds. Do not " +
-  "operate heavy discourse.";
+const LABEL = "WARNING: Contains opinions formed in under three seconds. Do not operate heavy discourse.";
+const LIMIT = 160;
 
-// Guard the gate before writing: 1 to 160 characters, not only white space.
-const length = [...text].length;
-if (length < 1 || length > 160 || text.trim().length === 0) {
-  throw new Error(`entry text must be 1-160 characters, got ${length}`);
+function inspect(value) {
+  const size = Array.from(value).length;
+  if (!value.trim()) {
+    throw new Error("label text is blank");
+  }
+  if (size > LIMIT) {
+    throw new Error(`label is ${size} chars, limit is ${LIMIT}`);
+  }
+  if (value.includes("\n")) {
+    throw new Error("label must be one line");
+  }
+  if (!value.startsWith("WARNING:")) {
+    throw new Error("label must open with WARNING:");
+  }
 }
 
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-mkdirSync(out, { recursive: true });
-writeFileSync(join(out, 'entry.txt'), text + '\n');
+function publish() {
+  inspect(LABEL);
+  const folder = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+  fs.mkdirSync(folder, { recursive: true });
+  fs.writeFileSync(path.join(folder, "entry.txt"), LABEL + "\n");
+}
+
+publish();
